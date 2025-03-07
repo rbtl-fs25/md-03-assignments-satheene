@@ -1,7 +1,7 @@
 ---
 title: "Data transformation with dplyr"
 subtitle: "And make a plot"
-author: ""
+author: "Satheene Michel"
 format:
   html:
     embed-resources: true
@@ -44,10 +44,10 @@ sanitation <- read_csv("data/jmp_wld_sanitation_long.csv")
 
 1.  Run all code chunks above.
 2.  Use the `glimpse()` function to get an overview of the data set.
-3.  How many variables are in the data set?
+3.  How many variables are in the data set? We have 8 cathegories and a total of 73710 observations in total
 
 ```{r}
-
+glimpse(sanitation)
 ```
 
 ## Task 2
@@ -55,6 +55,8 @@ sanitation <- read_csv("data/jmp_wld_sanitation_long.csv")
 1.  Use the `count()` function with varname_short and varname_long to identify the definitions of the levels in these two variables.
 
 ```{r}
+sanitation %>% 
+  count(varname_short, varname_long)
 
 ```
 
@@ -69,7 +71,10 @@ sanitation <- read_csv("data/jmp_wld_sanitation_long.csv")
 2.  Store the result as a new object in your environment with a name of your choice.
 
 ```{r}
-
+sanitation_2000_to_2020 <- sanitation %>% 
+  filter(name == "Indonesia", 
+         year %in% c(2000, 2020),
+         varname_long != "safely managed sanitation services")
 ```
 
 ## Task 4
@@ -77,7 +82,10 @@ sanitation <- read_csv("data/jmp_wld_sanitation_long.csv")
 1.  Use the `count()` function with the data you created in Task 3 to verify that year 2000 and 2020 remained in the year variable.
 
 ```{r}
+sanitation_2000_to_2020 %>% 
+  count(year)
 
+#We have 24 values both time, so it should be working the way I intended it to
 ```
 
 ## Task 5
@@ -100,21 +108,42 @@ geom_text(aes(label = round(percent, 1)),
 ```
 
 ```{r}
-
+ggplot( data = sanitation_2000_to_2020,
+        mapping = aes(
+          x = residence,
+          y = percent,
+          fill = varname_long
+        ))+
+  facet_wrap(~year)+
+  geom_col()+
+  scale_fill_colorblind()+
+  geom_text(aes(label = round(percent, 1)), 
+          position = position_stack(vjust = 0.5),
+          size = 2, #personal adaption since it was simply messy with size = 3 :)
+          color = "white") 
 ```
 
 ## Task 6
 
 If you haven't worked with JMP indicators before, the following questions will be challenging to answer.
 
-1.  Look at the plot that you created. What do you notice about the order of the bars / order of the legend?
-2.  What would you want to change?
+1.  Look at the plot that you created. What do you notice about the order of the bars / order of the legend? both varname_long and residence are in alphabelical order (varname_long; from up to down, residence; from left to right)
+
+2.  What would you want to change? I would probably change the legend of varname_long and where the portion of the legend is in the bar to make more logical sense. For example from worst to best from the top down. This makes more sense for me to see how much of the sanitation has to be improved.
+
 3.  Why did we remove "safely managed sanitation services" from the data set in Task 3?
+
+    Since the main goal here is to see how we can improve the sanitation situation in our chosen country, using the "safely managed sanitation services" has no real information for us, since we cannot improve it anymore. Taking this out of the dataset gives us a more accurate overview about how the lower standards have evolved over the last 20 years.
 
 ## Task 7
 
 1.  Run the code in the code chunk below.
+
 2.  What do you observe when you look at the code and plot?
+
+    Observation code: We defined a new data set sanitation_2020 only looking at the year 2020- We then plotted this new data, using x-axis as percentage and the y-name as varname_short. The varname_short also is used to choose the color. We made a histogram and allowed fro changing y-axis with the scales = "free_y". No legende
+
+    Observation plot: We see that san_sm seems to be the most evenly distributed historgram, while san_lim, san_od and san_unimp have a peak at the left side (0% - 25%) while san_bas has a peak on the right (75% - 100%). We also see that how the trend of the histogramm is the same for all the three catheogories of residences.
 
 ```{r}
 
